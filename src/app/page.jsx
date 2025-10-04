@@ -40,7 +40,11 @@ import AssistanceSection from "@/components/AssistanceSection";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import CallToActionSection from "@/components/CallToActionSection";
 import FaqSection from "@/components/FaqSection";
-import UniversalFeeCalculator from "@/components/UniversalFeeCalculator";
+import ReraCalculator from "@/components/ReraCalculator";
+import WhyDrugLicence from "@/components/WhyDrugLicence";
+import StepsSecction from "@/components/StepsSecction";
+import RERAServicesSection from "@/components/RERAServicesSection";
+import HowWeHelpStrip from "@/components/HowWeHelpStrip";
 
 const Page = () => {
   return (
@@ -169,17 +173,18 @@ const Page = () => {
 
       {/* Page Content */}
       <HeroSection />
-      <UniversalFeeCalculator />
+      {/* <ReraCalculator /> */}
+      <RERAServicesSection />
 
       <FactoryLicenseGrid />
-
-      <FactoryLicenseSection />
       <StatsSection />
 
-      <FeatureCard />
-      <AssistanceSection />
-      <TestimonialCarousel />
-      <CallToActionSection />
+      <StepsSecction />
+ 
+
+       <AssistanceSection />
+       <TestimonialCarousel />
+      {/* <CallToActionSection /> */}
       <FaqSection />
     </>
   );

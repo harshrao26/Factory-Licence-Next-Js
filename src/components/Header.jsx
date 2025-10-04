@@ -1,213 +1,167 @@
-'use client';
+// components/Header.jsx
+"use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { FiMenu, FiX, FiSearch, FiChevronDown, FiPhone } from "react-icons/fi";
+import { MdAccountBalance } from "react-icons/md";
 
-import { FiMenu, FiX, FiChevronDown } from "react-icons/fi";
-import { PhoneCall } from "lucide-react";
+/**
+ * Header
+ * - Next.js 15 App Router compatible (JSX)
+ * - Tailwind CSS required
+ * - Drop into any page/layout (e.g., app/layout.jsx)
+ *
+ * Notes:
+ * - Replace logo block with your SVG if available
+ * - Nav structure is easy to extend
+ */
 
-import FL from "./FL"; // Your logo component
+const SERVICES = [
+  { title: "Project Registration", href: "/services/rera-registration" },
+  { title: "Agent Registration", href: "/services/agent-registration" },
+  { title: "Compliance & Escrow", href: "/services/compliance" },
+  { title: "Amendments & Extensions", href: "/services/amendments" },
+];
 
-const Nav = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const [expandedMenus, setExpandedMenus] = useState({});
-  const timeoutRef = useRef(null);
-  const pathname = usePathname();
+export default function Header() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef(null);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-
-  const toggleSubMenu = (index) => {
-    setExpandedMenus((prev) => ({ ...prev, [index]: !prev[index] }));
-  };
-
-  
-  const navItems = [
-    { name: "Home", path: "/" },
-    {
-      name: "Factory Licence",
-      subNav: [
-        { name: "Delhi", path: "/factory-licence-in-delhi" },
-        { name: "Haryana", path: "/factory-licence-in-haryana" },
-        { name: "Uttar Pradesh", path: "/factory-licence-in-uttar-pradesh" },
-      ],
-    },
-
-    {
-      name: "Pollution NOC",
-      subNav: [
-        { name: "Delhi", path: "/pollution-noc-in-delhi" },
-        { name: "Haryana", path: "/pollution-noc-in-haryana" },
-        { name: "Uttar Pradesh", path: "/pollution-noc-in-uttar-pradesh" },
-      ],
-    },
-
-
-    {
-      name: "Fire NOC",
-      subNav: [
-        { name: "Delhi", path: "/fire-noc-in-delhi" },
-        { name: "Haryana", path: "/fire-noc-in-haryana" },
-        { name: "Uttar Pradesh", path: "/fire-noc-in-uttar-pradesh" },
-      ],
-    },
-
-   
-
-    // {
-    //   name: "Pollution NOC",
-    //   subNav: [
-    //     { name: "Delhi", path: "https://delhi.pollutionnoc.factorylicence.in" },
-    //     {
-    //       name: "Haryana",
-    //       path: "https://haryana.pollutionnoc.factorylicence.in",
-    //     },
-    //     {
-    //       name: "Uttar Pradesh",
-    //       path: "https://uttarpradesh.pollutionnoc.factorylicence.in",
-    //     },
-    //   ],
-    // },
-    { name: "About Us", path: "/about" },
-    { name: "Blogs", path: "/blogs" },
-    
-  ];
+  // close dropdowns on outside click / esc
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        setServicesOpen(false);
+        setSearchOpen(false);
+      }
+    }
+    function onDoc(e) {
+      // if click outside search input when open -> close
+      if (searchOpen && searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("click", onDoc);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", onDoc);
+    };
+  }, [searchOpen]);
 
   return (
-    <nav className={`fixed top-0 w-full z-50 h-20 transition-all duration-300 ${isScrolled ? "bg-white shadow" : "bg-white"}`}>
-      <div className="max-w-7xl mx-auto flex justify-between items-center h-full px-4 md:px-6">
-        <Link href="/" aria-label="Factory Licence Home">
-          <div><FL /></div>
-        </Link>
+    <header className="sticky top-0 z-50">
+      <div className="backdrop-blur bg-white/60 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Logo */}
+            <div className="flex items-center gap-4">
+              <Link href="/" className="inline-flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-yellow-400 flex items-center justify-center text-slate-900 font-bold shadow">
+                  LF
+                </div>
+                <div className="hidden sm:flex flex-col leading-tight">
+                  <span className="font-bold text-sm text-slate-900">Lawfinity</span>
+                  <span className="text-xs text-slate-500 -mt-0.5">RERA compliance experts</span>
+                </div>
+              </Link>
+            </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex gap-6 text-sm font-medium">
-          {navItems.map((item, i) => (
-            <div
-              key={i}
-              className="relative group"
-              onMouseEnter={() => {
-                clearTimeout(timeoutRef.current);
-                setActiveDropdown(i);
-              }}
-              onMouseLeave={() => {
-                timeoutRef.current = setTimeout(() => setActiveDropdown(null), 200);
-              }}
-            >
-              <Link
-                href={item.path || "#"}
-                className={`flex items-center gap-1 transition hover:text-purple-600 ${
-                  pathname === item.path ? "text-purple-600" : "text-gray-800"
-                }`}
-              >
-                {item.name}
-                {item.subNav && <FiChevronDown size={14} />}
+            {/* Center: Nav (desktop) */}
+            <nav className="hidden lg:flex lg:items-center lg:gap-6">
+              <Link href="/" className="text-sm text-slate-700 hover:text-slate-900 px-2 py-1 rounded-md">Home</Link>
+              <Link href="/about" className="text-sm text-slate-700 hover:text-slate-900 px-2 py-1 rounded-md">About Us</Link>
+              <Link href="/contact" className="text-sm text-slate-700 hover:text-slate-900 px-2 py-1 rounded-md">Contact Us</Link>
+
+             
+            </nav>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-3">
+              {/* Search */}
+               
+
+              {/* Phone quick link */}
+              <a href="tel:+911234567890" className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-white/80 border border-white/10 shadow-sm hover:shadow md:flex">
+                <FiPhone className="text-amber-600" />
+                <span className="text-xs text-slate-800">+91 12 3456 7890</span>
+              </a>
+
+              {/* Primary CTA */}
+              <Link href="/get-started" className="hidden md:inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-2xl font-semibold shadow">
+                <MdAccountBalance /> Register Project
               </Link>
 
-              {item.subNav && activeDropdown === i && (
-                <div className="absolute left-0 mt-2 z-50 bg-white border rounded-md shadow-md">
-                  {item.subNav.map((subItem, j) => (
-                    <Link
-                      key={j}
-                      href={subItem.path}
-                      className="block px-6 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-purple-600"
-                    >
-                      {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop Button */}
-        <div className="hidden md:flex items-center gap-3 text-black font-semibold">
-<a href="tel:+919910774687" className="border border-gray-400 px-4 py-2 rounded-full text-xs md:text-sm flex items-center gap-2 hover:bg-gray-100 text-black font-semibold transition">
-  <PhoneCall size={18} />
-Talk To Expert
-</a>
-
-        </div>
-
-        {/* Mobile Toggle */}
-        <div className="md:hidden">
-          <button onClick={toggleMenu} aria-label="Toggle Menu" className=" text-black font-semibold">
-            {isOpen ? <FiX size={26} /> : <FiMenu size={26}  className="text-black"/>}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-          onClick={toggleMenu}
-        />
-      )}
-
-      {/* Mobile Menu */}
-      <div
-        className={`fixed top-0 left-0 z-50 bg-white w-4/5 max-w-sm h-full shadow-lg transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex justify-between items-center p-5">
-          <Link href="/" onClick={toggleMenu}>
-            <div className="text-xl font-bold text-purple-700">Factory Licence</div>
-          </Link>
-          <button onClick={toggleMenu} aria-label="Close menu">
-            <FiX size={28} className="text-black" />
-          </button>
-        </div>
-
-        <nav className="flex flex-col gap-5 px-6 pt-4 text-gray-800 text-base">
-          {navItems.map((item, i) => (
-            <div key={i} className="flex flex-col">
-              <div
-                className="flex justify-between items-center cursor-pointer"
-                onClick={() => item.subNav ? toggleSubMenu(i) : toggleMenu()}
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="inline-flex lg:hidden items-center justify-center p-2 rounded-md hover:bg-gray-50 text-slate-700"
+                aria-label="Open menu"
               >
-                <Link
-                  href={item.path || "#"}
-                  onClick={!item.subNav ? toggleMenu : undefined}
-                  className="hover:text-purple-600"
-                >
-                  {item.name}
-                </Link>
-                {item.subNav && (
-                  <FiChevronDown className={`transition-transform ${expandedMenus[i] ? "rotate-180" : ""}`} />
-                )}
-              </div>
+                <FiMenu />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              {item.subNav && expandedMenus[i] && (
-                <div className="pl-4 mt-2 flex flex-col gap-2 text-sm text-gray-700">
-                  {item.subNav.map((subItem, j) => (
-                    <Link
-                      key={j}
-                      href={subItem.path}
-                      onClick={toggleMenu}
-                      className="hover:text-purple-600"
-                    >
-                      {subItem.name}
+      {/* Mobile panel */}
+      <div className={`lg:hidden fixed inset-0 z-40 transition-transform ${mobileOpen ? "translate-x-0" : "translate-x-full"} `} aria-hidden={!mobileOpen}>
+        <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)}></div>
+        <aside className="relative z-50 w-[92vw] max-w-sm h-full bg-white shadow-2xl p-6 overflow-auto">
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="inline-flex items-center gap-3" onClick={() => setMobileOpen(false)}>
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-yellow-400 flex items-center justify-center text-slate-900 font-bold">LF</div>
+              <div className="flex flex-col">
+                <span className="font-bold text-sm text-slate-900">Lawfinity</span>
+                <span className="text-xs text-slate-500 -mt-0.5">RERA experts</span>
+              </div>
+            </Link>
+
+            <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-2 rounded-md hover:bg-gray-100">
+              <FiX />
+            </button>
+          </div>
+
+          <nav className="space-y-3">
+            <Link href="/" onClick={() => setMobileOpen(false)} className="block px-3 py-2 rounded-md text-slate-700 hover:bg-amber-50">Home</Link>
+
+            <div>
+              <button
+                onClick={() => setServicesOpen((s) => !s)}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-slate-700 hover:bg-amber-50"
+                aria-expanded={servicesOpen}
+              >
+                Services <FiChevronDown />
+              </button>
+              {servicesOpen && (
+                <div className="mt-2 space-y-1 pl-4">
+                  {SERVICES.map((s) => (
+                    <Link key={s.href} href={s.href} onClick={() => setMobileOpen(false)} className="block text-sm text-slate-700 px-3 py-2 rounded-md hover:bg-amber-50">
+                      {s.title}
                     </Link>
                   ))}
                 </div>
               )}
             </div>
-          ))}
 
-         <a href="tel:+919910774687" className="border border-gray-400 px-4 py-2 rounded-full text-xs md:text-sm flex items-center gap-2 hover:bg-gray-100 text-black font-semibold transition">
-  <PhoneCall size={18} />
-  +91 99107 74687
-</a>
+             
+            <div className="mt-4 border-t border-gray-100 pt-4">
+              <Link href="/contact" onClick={() => setMobileOpen(false)} className="block w-full text-center bg-amber-600 text-white px-4 py-2 rounded-2xl font-semibold mb-3">Get Started</Link>
+              <a href="tel:+911234567890" className="block text-center px-4 py-2 rounded-md border border-gray-100">+91 12 3456 7890</a>
+            </div>
 
-        </nav>
+            <div className="mt-6 text-sm text-slate-500">
+              <div>Lawfinity India Pvt Ltd</div>
+              <div className="mt-1">Delhi, India</div>
+            </div>
+          </nav>
+        </aside>
       </div>
-    </nav>
+    </header>
   );
-};
-
-export default Nav;
+}
